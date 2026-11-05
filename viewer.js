@@ -49,8 +49,16 @@
     surface([v(x,y,z),v(x,y,Z),v(x,Y,Z),v(x,Y,z)],side);
     surface([v(x,y,z),v(X,y,z),v(X,Y,z),v(x,Y,z)],front)
   }
-  // Interior displays are straight-edged, solid plinths from the floor to the tabletop; no legs.
-  function platform(x,z,rx,rz){box(x-rx,.02,z-rz,rx*2,.46,rz*2,'#7dcad5','#5fa5ae','#4c929e')}
+  // Interior platforms keep their elliptical tops, but are solid cylinders with vertical sides and no legs.
+  function platform(x,z,rx,rz){
+    const steps=32,base=.02,top=.48;
+    for(let i=0;i<steps;i++){
+      const a=i*2*Math.PI/steps,b=(i+1)*2*Math.PI/steps;
+      const x1=x+rx*Math.cos(a),z1=z+rz*Math.sin(a),x2=x+rx*Math.cos(b),z2=z+rz*Math.sin(b);
+      surface([v(x1,base,z1),v(x2,base,z2),v(x2,top,z2),v(x1,top,z1)],'#58a3ae',null);
+    }
+    circle(x,top,z,rx,rz,'#7dcad5','#3f8390',steps);
+  }
   function windowShelf(){
     // A low continuous wavy shelf follows the blue strip against the window in the plan.
     // Its width and height are conceptual; the room's actual construction dimensions are unknown.
