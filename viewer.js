@@ -49,7 +49,8 @@
     surface([v(x,y,z),v(x,y,Z),v(x,Y,Z),v(x,Y,z)],side);
     surface([v(x,y,z),v(X,y,z),v(X,Y,z),v(x,Y,z)],front)
   }
-  function platform(x,z,rx,rz){circle(x,.02,z,rx+.08,rz+.08,'#bad9db');circle(x,.48,z,rx,rz,'#7dcad5','#3f8390');for(const [dx,dz] of [[-.53,-.46],[.53,-.46],[-.53,.46],[.53,.46]])box(x+rx*dx-.04,.02,z+rz*dz-.04,.08,.45,.08,'#a8cbd0','#8cb5ba','#a8cbd0')}
+  // Interior displays are straight-edged, solid plinths from the floor to the tabletop; no legs.
+  function platform(x,z,rx,rz){box(x-rx,.02,z-rz,rx*2,.46,rz*2,'#7dcad5','#5fa5ae','#4c929e')}
   function windowShelf(){
     // A low continuous wavy shelf follows the blue strip against the window in the plan.
     // Its width and height are conceptual; the room's actual construction dimensions are unknown.
