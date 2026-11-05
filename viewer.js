@@ -51,21 +51,21 @@
     // Three fake hands on the low nail-art table; colored nail-sticker squares.
     for(let i=0;i<3;i++){let x=5.88+i*.43;box(x,.51,1.64,.24,.06,.3,'#edc8ae','#d9ac96','#d9ac96');for(let j=0;j<4;j++)box(x+j*.055,.58,1.55,.045,.04,.14,['#d7849e','#e6bd78','#9dafc6','#b8a1c3'][(i+j)%4])}
     // Shoe voting occupies the narrow right-hand edge, upper arm of the L.
-    box(8.8,.02,1.0,.25,.48,2.75,'#7ac4d0');for(let i=0;i<4;i++){let z=1.17+i*.63;for(const side of [0,.13])box(8.69,.51,z+side,.36,.07,.12,i%2?'#f5e2c8':'#fcf7ee','#a99b8d','#c7b6a4')}
+    for(let i=0;i<4;i++){let z=1.17+i*.63;for(const side of [0,.13])box(8.69,.035,z+side,.36,.07,.12,i%2?'#f5e2c8':'#fcf7ee','#a99b8d','#c7b6a4')}
     // Three low clothes racks near the internal corner (no high gallery wall).
     for(let i=0;i<3;i++){let x=5.95+i*.82;stroke3(v(x,.05,4.2),v(x,1.35,4.2),'#627b73',3);stroke3(v(x-.18,1.35,4.2),v(x+.18,1.35,4.2),'#627b73',3);surface([v(x-.17,1.12,4.15),v(x+.17,1.12,4.15),v(x+.24,.58,4.15),v(x-.24,.58,4.15)],['#a4bd96','#d5a7a5','#e3c681'][i],'#789184')}
     // Paper-doll stickers and a fixed large stamp, both on low tables.
     circle(2.85,.54,5.7,.15,.12,'#eac7a7');box(2.64,.52,5.79,.42,.07,.36,'#fbf0df');for(const [x,z,c] of [[2.52,5.47,'#bda3cb'],[3.04,5.54,'#dc91a1'],[2.98,5.93,'#9fbd8d']])box(x,.52,z,.14,.035,.14,c);
     box(2.55,.51,8.05,.42,.1,.28,'#edd9ad');box(2.69,.61,8.14,.15,.36,.12,'#dcaa62');circle(2.77,.99,8.20,.15,.11,'#e5b775');
-    // Footprint perimeter, with a gap along the lower right edge for the entrance.
-    for(let i=0;i<floor.length;i++){let a=floor[i],b=floor[(i+1)%floor.length];if(i===3){stroke3(a,v(5.4,.02,7.45),'#bc632c',2);stroke3(v(5.4,.02,9.45),b,'#bc632c',2)}else stroke3(a,b,'#bc632c',2)}
+    // Conceptual entrance gap on the shoe side of the footprint, not the inner lower edge.
+    for(let i=0;i<floor.length;i++){let a=floor[i],b=floor[(i+1)%floor.length];if(i===1){stroke3(a,v(9.2,.02,3.65),'#bc632c',2);stroke3(v(9.2,.02,4.35),b,'#bc632c',2)}else stroke3(a,b,'#bc632c',2)}
     drawables.sort((a,b)=>b.depth-a.depth);for(const item of drawables)item.segment?drawLine(item):drawShape(item);
     const labels=[['蜘蛛腿',[3.25,1.48,2.25],'#79533b'],['美甲',[6.55,1.2,1.1],'#94516b'],['排鞋子',[8.28,1.4,2.4],'#50768c'],['掛衣服',[6.7,1.67,4.4],'#517a50'],['紙娃娃貼紙',[3.15,1.15,5.8],'#7d6289'],['蓋章',[2.84,1.5,8.35],'#976638'],['光影印章',[.77,2.15,2.45],'#99713e'],['投袋子',[.8,2.18,7.65],'#527f80']];
     for(const [text,p,color] of labels)label(text,p,color);
-    label('入口 →',[5.55,.05,8.45],'#3d656a');requestAnimationFrame(draw)
+    label('入口 →',[8.65,.05,3.92],'#3d656a');requestAnimationFrame(draw)
   }
   canvas.addEventListener('pointerdown',e=>{drag=true;moved=false;px=e.clientX;py=e.clientY;canvas.setPointerCapture(e.pointerId);canvas.classList.add('dragging')});
-  canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-px,dy=e.clientY-py;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;scene.yaw-=dx*.006;scene.pitch=clamp(scene.pitch-dy*.005,.32,1.52);px=e.clientX;py=e.clientY});
+  canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-px,dy=e.clientY-py;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;scene.yaw-=dx*.006;scene.pitch=clamp(scene.pitch+dy*.005,.32,1.52);px=e.clientX;py=e.clientY});
   canvas.addEventListener('pointerup',()=>{drag=false;canvas.classList.remove('dragging')});
   canvas.addEventListener('pointercancel',()=>{drag=false;canvas.classList.remove('dragging')});
   canvas.addEventListener('wheel',e=>{e.preventDefault();scene.radius=clamp(scene.radius+e.deltaY*.013,11,30)},{passive:false});
