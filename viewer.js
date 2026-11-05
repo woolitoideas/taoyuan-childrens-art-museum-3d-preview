@@ -14,6 +14,33 @@
   function surface(points,color,stroke='#52646a55',lineWidth=1){const center=points.reduce((s,p)=>s.map((n,i)=>n+p[i]),[0,0,0]).map(n=>n/points.length);drawables.push({points,color,stroke,lineWidth,depth:project(center).depth})}
   function stroke3(a,b,color,width=2){drawables.push({segment:[a,b],color,width,depth:project(v((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2)).depth})}
   function circle(x,y,z,rx,rz,color,stroke='#52646a55',steps=18){surface(Array.from({length:steps},(_,i)=>v(x+rx*Math.cos(i*2*Math.PI/steps),y,z+rz*Math.sin(i*2*Math.PI/steps))),color,stroke)}
+  function glassFishbowl(z){
+    // Shallow relief on the glass: a rounded transparent aquarium pouch, not a solid box.
+    const p=(x,y,dz)=>v(x,y,z+dz),back=.13,water=.19,fig=.25,front=.30,trim=.34;
+    const silhouette=[[1.18,-.31],[1.18,.31],[1.04,.37],[.78,.43],[.53,.38],[.35,.25],[.29,0],[.35,-.25],[.53,-.38],[.78,-.43],[1.04,-.37]];
+    surface(silhouette.map(([y,dz])=>p(back,y,dz)),'#c9eef13d');
+    // Blue waves and a pale sandy bottom remain visible behind the clear cover.
+    surface([[.91,-.40],[.94,-.27],[.89,-.12],[.95,.04],[.90,.19],[.94,.36],[.78,.43],[.53,.38],[.35,.25],[.29,0],[.35,-.25],[.53,-.38],[.78,-.43]].map(([y,dz])=>p(water,y,dz)),'#49add5b8');
+    for(let j=0;j<5;j++)stroke3(p(fig,.91+(j%2)*.035,-.39+j*.19),p(fig,.91+((j+1)%2)*.035,-.20+j*.19),'#aae9f4',2);
+    surface([[.43,-.32],[.38,-.23],[.33,-.12],[.30,0],[.33,.12],[.38,.23],[.43,.32],[.52,.34],[.49,.16],[.47,-.08],[.50,-.28]].map(([y,dz])=>p(fig,y,dz)),'#e4c8a1');
+    for(const dz of [-.12,.09,.25]){stroke3(p(fig,.40,dz),p(fig,.68,dz-.035),'#426c55',2.4);stroke3(p(fig,.51,dz-.015),p(fig,.60,dz-.10),'#426c55',1.5)}
+    // Two small fish and a jellyfish: simplified motifs from the reference, not exact artwork.
+    for(const [y,dz,c,dir] of [[.73,-.20,'#a5d66e',1],[.64,.12,'#f9d9a6',-1]]){
+      surface(Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return p(fig,y+.085*Math.sin(a),dz+.105*Math.cos(a))}),c);
+      surface([p(fig,y,dz-dir*.085),p(fig,y+.09,dz-dir*.20),p(fig,y-.09,dz-dir*.20)],c);
+      surface(Array.from({length:8},(_,i)=>{let a=i*Math.PI/4;return p(trim,y+.014*Math.sin(a),dz+dir*.055+.014*Math.cos(a))}),'#394752');
+    }
+    surface(Array.from({length:9},(_,i)=>{const a=i*Math.PI/8;return p(fig,.76+.07*Math.sin(a),.25+.075*Math.cos(a))}),'#c77ac5');
+    for(const dz of [.20,.25,.30])stroke3(p(fig,.76,dz),p(fig,.60,dz+.02),'#d8a8d4',1.6);
+    // Glossy clear skin, thick charcoal felt piping, top lip and two attachment eyelets.
+    surface(silhouette.map(([y,dz])=>p(front,y,dz)),'#e3fbff20');
+    for(let i=0;i<silhouette.length;i++){let a=silhouette[i],b=silhouette[(i+1)%silhouette.length];stroke3(p(trim,a[0],a[1]),p(trim,b[0],b[1]),'#716b71',6)}
+    surface([p(trim,1.35,-.32),p(trim,1.35,.32),p(trim,1.16,.34),p(trim,1.16,-.34)],'#79727a');
+    for(const dz of [-.19,.19]){
+      surface(Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return p(trim+.01,1.255+.035*Math.sin(a),dz+.035*Math.cos(a))}),'#d4cdd0','#4e4b50');
+      surface(Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return p(trim+.02,1.255+.018*Math.sin(a),dz+.018*Math.cos(a))}),'#91c1c5');
+    }
+  }
   function box(x,y,z,w,h,d,top,side='#b8d7d9',front='#a6c9cd'){
     const X=x+w,Y=y+h,Z=z+d;
     surface([v(x,Y,z),v(X,Y,z),v(X,Y,Z),v(x,Y,Z)],top);
@@ -44,8 +71,8 @@
     platform(2.75,8.0,.48,.55); // stamp
     // Glass-side color selection, acrylic swatches and projected colored patches.
     for(let i=0;i<5;i++){const z=1.55+i*.5;box(.18,.2,z,.13,.14,.3,['#e8ac6d','#dc808d','#d6c27a','#a6bd91','#b895cb'][i]);circle(.54,.035,z+.08,.18,.13,['#f5cb8a','#eeb1b5','#e4d694','#c9dcaa','#d7c1e1'][i],null)}
-    // Transparent bags attached to the same glass boundary, below the light-stamp section.
-    for(let i=0;i<3;i++){let z=6.55+i*.8;box(.12,.43,z,.18,.58,.48,'#cce5e6b0','#a9d3d7ad','#cce5e6aa');stroke3(v(.25,1.01,z+.08),v(.25,1.13,z+.2),'#5f9c9e',2);stroke3(v(.25,1.13,z+.2),v(.25,1.01,z+.38),'#5f9c9e',2)}
+    // Aquarium-shaped transparent pouches on the same glass boundary; counts and locations remain schematic.
+    for(let i=0;i<3;i++)glassFishbowl(6.55+i*.9);
     // A spider-like object: body and legs support large wearable shapes; form remains provisional.
     circle(3.35,.82,2.6,.43,.33,'#d99658');for(let i=0;i<8;i++){const a=i*Math.PI/4,dx=Math.cos(a),dz=Math.sin(a);stroke3(v(3.35+dx*.22,.78,2.6+dz*.19),v(3.35+dx*.56,.66,2.6+dz*.48),'#765f55',6);stroke3(v(3.35+dx*.56,.66,2.6+dz*.48),v(3.35+dx*.76,.34,2.6+dz*.60),'#765f55',5);if(i<3)box(3.35+dx*.68-.12,.38,2.6+dz*.54-.12,.24,.27,.24,['#eab466','#a7b9d7','#d7a5bd'][i])}
     // Three fake hands on the low nail-art table; colored nail-sticker squares.
