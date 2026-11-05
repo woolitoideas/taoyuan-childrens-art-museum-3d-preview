@@ -52,8 +52,19 @@
     for(let i=0;i<3;i++){let x=5.88+i*.43;box(x,.51,1.64,.24,.06,.3,'#edc8ae','#d9ac96','#d9ac96');for(let j=0;j<4;j++)box(x+j*.055,.58,1.55,.045,.04,.14,['#d7849e','#e6bd78','#9dafc6','#b8a1c3'][(i+j)%4])}
     // Shoe voting occupies the narrow right-hand edge, upper arm of the L.
     for(let i=0;i<4;i++){let z=1.17+i*.63;for(const side of [0,.13])box(8.69,.035,z+side,.36,.07,.12,i%2?'#f5e2c8':'#fcf7ee','#a99b8d','#c7b6a4')}
-    // Three low clothes racks near the internal corner (no high gallery wall).
-    for(let i=0;i<3;i++){let x=5.95+i*.82;stroke3(v(x,.05,4.2),v(x,1.35,4.2),'#627b73',3);stroke3(v(x-.18,1.35,4.2),v(x+.18,1.35,4.2),'#627b73',3);surface([v(x-.17,1.12,4.15),v(x+.17,1.12,4.15),v(x+.24,.58,4.15),v(x-.24,.58,4.15)],['#a4bd96','#d5a7a5','#e3c681'][i],'#789184')}
+    // Tree-branch coat stands: slender poles, alternating short hooks and round floor bases.
+    // Preserve the existing conceptual rack positions; the reference photo does not set quantities or colors.
+    for(let i=0;i<3;i++){
+      const x=5.95+i*.82,z=4.2,c='#627b73';
+      circle(x,.04,z,.21,.19,'#82988c','#52665e');
+      stroke3(v(x,.08,z),v(x,1.55,z),c,5);
+      for(let j=0;j<5;j++){
+        const side=j%2===0?1:-1,y=.37+j*.23;
+        const tip=v(x+side*.27,y+.19,z+(j%3-1)*.12);
+        stroke3(v(x,y,z),tip,c,3);
+        stroke3(tip,v(tip[0]+side*.10,tip[1]+.10,tip[2]),c,2.5)
+      }
+    }
     // Paper-doll stickers and a fixed large stamp, both on low tables.
     circle(2.85,.54,5.7,.15,.12,'#eac7a7');box(2.64,.52,5.79,.42,.07,.36,'#fbf0df');for(const [x,z,c] of [[2.52,5.47,'#bda3cb'],[3.04,5.54,'#dc91a1'],[2.98,5.93,'#9fbd8d']])box(x,.52,z,.14,.035,.14,c);
     box(2.55,.51,8.05,.42,.1,.28,'#edd9ad');box(2.69,.61,8.14,.15,.36,.12,'#dcaa62');circle(2.77,.99,8.20,.15,.11,'#e5b775');
