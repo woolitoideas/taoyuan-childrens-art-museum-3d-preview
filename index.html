@@ -15,13 +15,14 @@
     .eyebrow{color:#bf632c;font-size:11px;font-weight:800;letter-spacing:.1em}
     h1{margin:0;font-size:clamp(30px,3vw,42px);line-height:1.15;letter-spacing:-.06em}h1 span{display:block;color:#e87838}
     .lead{font-size:13px;line-height:1.8;color:#536166;margin:0}
-    .legend{list-style:none;margin:3px 0 0;padding:0;display:grid;gap:11px}.legend li{font-size:13px;display:flex;align-items:center;gap:10px;line-height:1.4}.dot{flex:none;width:11px;height:11px;border-radius:50%;background:var(--c)}
+    .legend{list-style:none;margin:3px 0 0;padding:0;display:grid;gap:6px}.legend li{min-width:0}.zone-button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;padding:9px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:#324045;font:inherit;font-size:13px;font-weight:600;line-height:1.4;cursor:pointer;transition:background .18s,border-color .18s,transform .18s}.zone-button:hover{background:#fffdf7;border-color:#ded5ca;transform:translateX(2px)}.zone-button:focus-visible,.close-button:focus-visible,.source-link:focus-visible{outline:3px solid #d77844;outline-offset:2px}.zone-button .number{font-size:11px;font-weight:800;color:#ad663a;letter-spacing:.03em}.zone-button .arrow{margin-left:auto;font-size:16px;color:#aa7971}.dot{flex:none;width:11px;height:11px;border-radius:50%;background:var(--c)}
     .note{margin-top:auto;padding-top:18px;border-top:1px solid #ddd8ce;font-size:11px;color:#6b7778;line-height:1.7}
+    .zone-dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100vw - 28px));max-height:min(85vh,760px);overflow:auto;background:#fffdf8;color:#28373b;box-shadow:0 28px 85px #30404750}.zone-dialog::backdrop{background:#27363ab0;backdrop-filter:blur(4px)}.dialog-inner{padding:clamp(24px,5vw,40px)}.dialog-top{display:flex;align-items:start;justify-content:space-between;gap:20px}.dialog-index{font-size:12px;font-weight:800;letter-spacing:.13em;color:#b4623b}.close-button{border:0;background:#f4ede5;color:#394b4e;border-radius:50%;width:36px;height:36px;flex:none;cursor:pointer;font-size:22px;line-height:1}.zone-dialog h2{font-size:clamp(27px,5vw,38px);letter-spacing:-.05em;line-height:1.2;margin:13px 0 8px}.zone-theme{margin:0 0 24px;font-size:13px;color:#8f6658}.dialog-rule{height:5px;width:80px;border-radius:8px;background:var(--zone-color)}.dialog-section{margin-top:26px}.dialog-section h3{font-size:12px;letter-spacing:.13em;color:#ad693e;margin:0 0 9px}.dialog-section p{font-size:16px;line-height:1.75;margin:0}.dialog-question{padding:17px 19px;background:#f6f0e8;border-radius:12px;font-size:17px;font-weight:700;line-height:1.5}.dialog-options{font-size:13px;color:#59686b;line-height:1.7;margin:12px 0 0}.dialog-footer{border-top:1px solid #e9e2d9;margin-top:28px;padding-top:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.dialog-caveat{font-size:11px;color:#788587}.source-link{font-size:13px;font-weight:700;color:#ae5d31;text-decoration:none}.source-link:hover{text-decoration:underline}
     .stage{position:relative;min-width:0;min-height:100vh;overflow:hidden;background:#e9e5df}
     canvas{width:100%;height:100%;min-height:100vh;display:block;touch-action:none;cursor:grab}canvas.dragging{cursor:grabbing}
     .topline,.bottomline{position:absolute;pointer-events:none;background:#fffdf8d9;border:1px solid #ded8cc;border-radius:8px;color:#526064;font-size:11px;padding:9px 12px}
     .topline{top:20px;right:20px}.bottomline{bottom:20px;left:20px}
-    @media(max-width:780px){.app{display:block}aside{padding:19px;border-right:0;border-bottom:1px solid #ddd8ce;gap:9px}h1{font-size:28px}h1 span{display:inline}.lead{font-size:12px}.legend{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px 5px}.legend li{font-size:10px;gap:5px}.dot{width:7px;height:7px}.note{margin:3px 0 0;padding-top:8px;font-size:10px}.stage,canvas{min-height:65vh}.topline{top:10px;right:10px}.bottomline{bottom:10px;left:10px}}
+    @media(max-width:780px){.app{display:block}aside{padding:19px;border-right:0;border-bottom:1px solid #ddd8ce;gap:9px}h1{font-size:28px}h1 span{display:inline}.lead{font-size:12px}.legend{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.zone-button{font-size:12px;padding:8px 5px;gap:5px}.zone-button .arrow{font-size:13px}.dot{width:8px;height:8px}.note{margin:3px 0 0;padding-top:8px;font-size:10px}.stage,canvas{min-height:65vh}.topline{top:10px;right:10px}.bottomline{bottom:10px;left:10px}}
   </style>
 </head>
 <body>
@@ -30,15 +31,15 @@
       <div class="eyebrow">好廢的問卷 × 桃園兒童美術館</div>
       <h1>問題<span>長出來</span></h1>
       <p class="lead">依新版場地配置 PNG 的標示尺寸建立比例模型；展品以簡報目前啟用的展項為準。未定案的造型仍為概念示意。</p>
-      <ul class="legend" aria-label="展品位置">
-        <li><i class="dot" style="--c:#d99658"></i>套圈圈</li>
-        <li><i class="dot" style="--c:#d7849e"></i>手部貼票</li>
-        <li><i class="dot" style="--c:#7e9bb2"></i>掛／摺衣服</li>
-        <li><i class="dot" style="--c:#8bad79"></i>磁鐵</li>
-        <li><i class="dot" style="--c:#bd97b9"></i>蓋章</li>
-        <li><i class="dot" style="--c:#70a7a9"></i>光影印章</li>
-        <li><i class="dot" style="--c:#e5b775"></i>投袋子</li>
-      </ul>
+      <nav aria-label="七個展區介紹"><ul class="legend">
+        <li><button type="button" class="zone-button" data-zone="1" aria-haspopup="dialog"><span class="number">01</span><i class="dot" style="--c:#d99658"></i>套圈圈<span class="arrow" aria-hidden="true">↗</span></button></li>
+        <li><button type="button" class="zone-button" data-zone="2" aria-haspopup="dialog"><span class="number">02</span><i class="dot" style="--c:#d7849e"></i>手部貼票<span class="arrow" aria-hidden="true">↗</span></button></li>
+        <li><button type="button" class="zone-button" data-zone="3" aria-haspopup="dialog"><span class="number">03</span><i class="dot" style="--c:#7e9bb2"></i>摺衣服<span class="arrow" aria-hidden="true">↗</span></button></li>
+        <li><button type="button" class="zone-button" data-zone="4" aria-haspopup="dialog"><span class="number">04</span><i class="dot" style="--c:#8bad79"></i>磁鐵<span class="arrow" aria-hidden="true">↗</span></button></li>
+        <li><button type="button" class="zone-button" data-zone="5" aria-haspopup="dialog"><span class="number">05</span><i class="dot" style="--c:#bd97b9"></i>蓋章<span class="arrow" aria-hidden="true">↗</span></button></li>
+        <li><button type="button" class="zone-button" data-zone="6" aria-haspopup="dialog"><span class="number">06</span><i class="dot" style="--c:#70a7a9"></i>光影印章<span class="arrow" aria-hidden="true">↗</span></button></li>
+        <li><button type="button" class="zone-button" data-zone="7" aria-haspopup="dialog"><span class="number">07</span><i class="dot" style="--c:#e5b775"></i>投袋子<span class="arrow" aria-hidden="true">↗</span></button></li>
+      </ul></nav>
       <p class="note">場地外框約 14.60 × 14.50 公尺，左側與上側為玻璃。展品尺寸依配置圖及展區規劃簡報；未標尺寸之高度為概念值。非施工圖。</p>
     </aside>
     <section class="stage" aria-label="問題長出來新版 3D 場地配置">
@@ -47,7 +48,49 @@
       <div class="bottomline">拖曳旋轉 · 滾輪縮放</div>
     </section>
   </main>
+  <dialog id="zone-dialog" class="zone-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-inner">
+      <div class="dialog-top"><span id="dialog-index" class="dialog-index"></span><button type="button" id="dialog-close" class="close-button" aria-label="關閉展區介紹">×</button></div>
+      <h2 id="dialog-title"></h2><p id="dialog-theme" class="zone-theme"></p><div id="dialog-rule" class="dialog-rule"></div>
+      <section class="dialog-section"><h3>怎麼玩</h3><p id="dialog-play"></p></section>
+      <section class="dialog-section"><h3>簡報中的題目示例</h3><div id="dialog-question" class="dialog-question"></div><p id="dialog-options" class="dialog-options"></p></section>
+      <div class="dialog-footer"><span class="dialog-caveat">展項為規劃示意，題目與形式以定稿為準。</span><a id="dialog-source" class="source-link" target="_blank" rel="noopener noreferrer">查看對應簡報 ↗</a></div>
+    </div>
+  </dialog>
   <script src="./plan-contours.js"></script>
   <script src="./viewer.js"></script>
+  <script>
+    (() => {
+      // Only the current seven exhibit sections (slides 3–21); later archive/production slides are not used.
+      const deck = 'https://docs.google.com/presentation/d/1hPi4xA_Mfoy9zawTb8nCbMkANR7xUUeneEztjH8S-xc/edit?slide=id.';
+      const zones = [
+        {title:'我的感覺、感受', theme:'家庭與自我 · 套圈圈', play:'選擇自己喜歡的答案，把投票圈套在桌面上對應的選項裝置，讓每個人的想法變成看得見的投票。', question:'如果生氣有顏色，會是什麼顏色？', options:'紅色 ／ 紫色 ／ 藍色 ／ 粉紅色', slide:'exhibit_4', color:'#d99658'},
+        {title:'認識身體', theme:'家庭與自我 · 手部貼票', play:'觀察自己的手，選一張貼紙，貼到代表自己答案的假手上。透過手指與左右手，想想自己怎麼認識身體。', question:'如果五隻手指頭是一家人，哪一隻是你？', options:'在手模型上貼紙投票；此處展示簡報中的其中一題。', slide:'exhibit_5', color:'#d7849e'},
+        {title:'我與家庭責任', theme:'家庭與自我 · 摺衣服', play:'在地面上的兩個區塊整理衣服：一邊折好，一邊亂疊、亂丟。看看拿到衣服時，你會做出哪一種選擇。', question:'在家會折衣服嗎？', options:'會（折好） ／ 不會（亂丟）', slide:'h245e0e9c757d49d8_7_59', color:'#7e9bb2'},
+        {title:'我跟社會的關聯', theme:'社會與學校 · 磁鐵', play:'想像長大以後的生活，依照題目把磁鐵貼到對應的圖案或位置，用選擇完成投票。', question:'長大後，你要坐哪一台車去上班？', options:'腳踏車 ／ 公車 ／ 怪手 ／ 碰碰車', slide:'h245e0e9c757d49d8_7_74', color:'#8bad79'},
+        {title:'我們想要的生活', theme:'社會與學校 · 蓋章', play:'想想和新同學、朋友相處時會怎麼選，再用蓋章留下自己的投票選擇。', question:'如果班上來了一位新同學，你想先帶他去哪裡？', options:'溜滑梯 ／ 盪鞦韆 ／ 沙坑區 ／ 吃點心', slide:'h245e0e9c757d49d8_7_89', color:'#bd97b9'},
+        {title:'我對自然的想像', theme:'自然 · 光影印章', play:'光透過玻璃上的半透明色片，在平台上映出色塊；把星星積木放在喜歡的色光上，回答對自然的想像。', question:'你喜歡什麼顏色的星星？', options:'以星星積木放在光影色塊上作答。', slide:'h245e0e9c757d49d8_7_119', color:'#70a7a9'},
+        {title:'我與自然的關係', theme:'自然 · 投袋子', play:'拿取投票物件，放進玻璃上對應選項的袋子，看看大家對自然的想像有哪些不同。', question:'如果你是魚，你想住在哪裡？', options:'白白的雪地 ／ 溫暖的家 ／ 藍藍的大海 ／ 綠綠的草地', slide:'h245e0e9c757d49d8_7_104', color:'#e5b775'}
+      ];
+      const dialog = document.getElementById('zone-dialog');
+      const field = id => document.getElementById('dialog-' + id);
+      document.querySelectorAll('[data-zone]').forEach(button => button.addEventListener('click', () => {
+        const index = Number(button.dataset.zone) - 1;
+        const zone = zones[index];
+        field('index').textContent = `展區 ${String(index + 1).padStart(2, '0')} ／ 07`;
+        field('title').textContent = zone.title;
+        field('theme').textContent = zone.theme;
+        field('play').textContent = zone.play;
+        field('question').textContent = zone.question;
+        field('options').textContent = zone.options;
+        field('rule').style.setProperty('--zone-color', zone.color);
+        field('source').href = deck + encodeURIComponent(zone.slide);
+        dialog.showModal();
+        document.getElementById('dialog-close').focus();
+      }));
+      document.getElementById('dialog-close').addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    })();
+  </script>
 </body>
 </html>
