@@ -1,6 +1,7 @@
 (() => {
   const canvas=document.getElementById('view'), stage=canvas.parentElement, ctx=canvas.getContext('2d',{alpha:false});
-  let W=0,H=0,drag=false,px=0,py=0,pendingFrame=false;
+  let W=0,H=0,drag=false,px=0,py=0,downX=0,downY=0,moved=false,pendingFrame=false;
+  let activeZone=null,hitShapes=[],labelHits=[];
   function scheduleDraw(){if(!pendingFrame){pendingFrame=true;requestAnimationFrame(()=>{pendingFrame=false;draw()})}}
   // One world unit = one metre. Plan dimensions: 14.60 × 14.50 m;
   // south arm 7.80 m, east arm 6.80 m deep, inner notch 6.80 × 7.70 m.
@@ -18,7 +19,7 @@
   let basis,drawables=[];
   function camera(){const {yaw,pitch,radius,target}=scene,eye=v(target[0]+radius*Math.cos(pitch)*Math.sin(yaw),target[1]+radius*Math.sin(pitch),target[2]+radius*Math.cos(pitch)*Math.cos(yaw));const forward=unit(sub(target,eye)),right=unit(cross(forward,[0,1,0])),up=unit(cross(right,forward));basis={eye,forward,right,up}}
   function project(p){const d=sub(p,basis.eye),depth=dot(d,basis.forward),f=Math.min(W*1.15,H*1.52)*(W<600?.98:1);return {x:W/2+dot(d,basis.right)*f/depth,y:H*.53-dot(d,basis.up)*f/depth,depth}}
-  function surface(points,color,stroke='#52646a55',lineWidth=1){const center=points.reduce((s,p)=>s.map((n,i)=>n+p[i]),[0,0,0]).map(n=>n/points.length);drawables.push({points,color,stroke,lineWidth,depth:project(center).depth})}
+  function surface(points,color,stroke='#52646a55',lineWidth=1){const center=points.reduce((s,p)=>s.map((n,i)=>n+p[i]),[0,0,0]).map(n=>n/points.length);drawables.push({points,color,stroke,lineWidth,depth:project(center).depth,zone:activeZone})}
   function line(a,b,color='#616b6b',width=2){drawables.push({segment:[a,b],color,width,depth:project(v((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2)).depth})}
   function disk(x,y,z,rx,rz,color,steps=24){surface(Array.from({length:steps},(_,i)=>v(x+rx*Math.cos(i*2*Math.PI/steps),y,z+rz*Math.sin(i*2*Math.PI/steps))),color)}
   function box(x,y,z,w,h,d,top,side='#55a7b5'){
@@ -57,13 +58,15 @@
     line(v(x+.025,y+.12,z-.22),v(x+.025,y+.12,z+.22),'#6ab0b9',2);
     disk(.11,y-.13,z,.02,.10,'#edc48e');
   }
-  function label(text,p,color='#3f6870'){const q=project(p);if(q.depth<=0)return;const fs=clamp(Math.min(W,H)*.019,11,18);ctx.save();ctx.font=`700 ${fs}px system-ui,"Noto Sans TC",sans-serif`;const width=ctx.measureText(text).width+18;const x=clamp(q.x-width/2,4,W-width-4),y=clamp(q.y,fs+6,H-8);ctx.fillStyle='#fffdf3ea';ctx.strokeStyle='#c9c2b5';ctx.beginPath();ctx.roundRect(x,y-fs-7,width,fs+14,6);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x+width/2,y-fs/2);ctx.restore()}
-  function drawShape(item){const pp=item.points.map(project);if(pp.some(t=>t.depth<=0))return;ctx.beginPath();ctx.moveTo(pp[0].x,pp[0].y);for(const p of pp.slice(1))ctx.lineTo(p.x,p.y);ctx.closePath();ctx.fillStyle=item.color;ctx.fill();if(item.stroke){ctx.strokeStyle=item.stroke;ctx.lineWidth=item.lineWidth;ctx.stroke()}}
+  function label(text,p,color='#3f6870',zone=null){const q=project(p);if(q.depth<=0)return;const fs=clamp(Math.min(W,H)*.019,11,18);ctx.save();ctx.font=`700 ${fs}px system-ui,"Noto Sans TC",sans-serif`;const width=ctx.measureText(text).width+18;const x=clamp(q.x-width/2,4,W-width-4),y=clamp(q.y,fs+6,H-8);ctx.fillStyle='#fffdf3ea';ctx.strokeStyle='#c9c2b5';ctx.beginPath();ctx.roundRect(x,y-fs-7,width,fs+14,6);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x+width/2,y-fs/2);ctx.restore();if(zone)labelHits.push({x,y:y-fs-7,w:width,h:fs+14,zone})}
+  function drawShape(item){const pp=item.points.map(project);if(pp.some(t=>t.depth<=0))return;ctx.beginPath();ctx.moveTo(pp[0].x,pp[0].y);for(const p of pp.slice(1))ctx.lineTo(p.x,p.y);ctx.closePath();ctx.fillStyle=item.color;ctx.fill();if(item.stroke){ctx.strokeStyle=item.stroke;ctx.lineWidth=item.lineWidth;ctx.stroke()}if(item.zone)hitShapes.push({points:pp,zone:item.zone})}
+  function insidePolygon(x,y,points){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)inside=!inside}return inside}
+  function pickZone(x,y){for(let i=labelHits.length-1;i>=0;i--){const h=labelHits[i];if(x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h)return h.zone}for(let i=hitShapes.length-1;i>=0;i--){const h=hitShapes[i];if(insidePolygon(x,y,h.points))return h.zone}return null}
   function drawLine(item){const [a,b]=item.segment.map(project);if(a.depth<=0||b.depth<=0)return;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=item.color;ctx.lineWidth=item.width;ctx.lineCap='round';ctx.stroke()}
   function draw(){
     const dpr=Math.min(devicePixelRatio||1,2),w=stage.clientWidth,h=stage.clientHeight;
     if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr)}W=w;H=h;ctx.setTransform(dpr,0,0,dpr,0,0);
-    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#faf7f0');bg.addColorStop(1,'#e5e0d9');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);camera();drawables=[];
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#faf7f0');bg.addColorStop(1,'#e5e0d9');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);camera();drawables=[];hitShapes=[];labelHits=[];
     const floor=[v(0,0,0),v(14.6,0,0),v(14.6,0,6.8),v(7.8,0,6.8),v(7.8,0,14.5),v(0,0,14.5)];
     drawShape({points:[v(-1,-.06,-1),v(15.6,-.06,-1),v(15.6,-.06,15.5),v(-1,-.06,15.5)],color:'#d8d4cb'});
     drawShape({points:floor,color:'#f3bcd1',stroke:'#d5859e',lineWidth:2});
@@ -71,15 +74,16 @@
     glassWall([0,0],[14.6,0]);glassWall([0,0],[0,14.5]);
     // PNG stations are ordered by their purple marks, but the marks themselves are not modelled.
     // 01: native three-lobed 300 × 200 cm contour; 70 cm height from deck.
-    extrudeOutline(contours.ring,.70);
+    activeZone=1;extrudeOutline(contours.ring,.70);
     for(const [x,z,c] of [[8.96,1.86,'#efa866'],[9.60,2.08,'#a6c695'],[10.18,1.96,'#d8aac7']]){disk(x,.73,z,.17,.17,c);line(v(x-.16,.77,z),v(x+.16,.77,z),'#a36655',2)}
     // 02: native rotated double-circle, with 350 × 200 cm along its drawn axes;
     // 60 cm conceptual height (not specified by plan).
-    extrudeOutline(contours.hands,.60);
+    activeZone=2;extrudeOutline(contours.hands,.60);
     for(let i=0;i<4;i++){let x=3.45+i*.55;box(x,.60,2.70,.30,.055,.38,'#efd0b8','#d5b29d');for(let j=0;j<4;j++)box(x+j*.065,.66,2.62,.045,.035,.12,['#d78ca7','#eed386','#9bbdce','#ba9cc6'][(i+j)%4])}
     // 03: the deck's p.10 is a side-by-side choice: neatly folded on the left,
     // casually thrown on the right. The coloured patches are FLOOR graphics only;
     // clothing stays on the floor (no raised platform, rack or implied divider wall).
+    activeZone=3;
     const floorPatch=(x0,x1,color)=>surface([v(x0,.012,4.78),v(x1,.012,4.78),v(x1,.012,6.78),v(x0,.012,6.78)],color,null);
     floorPatch(10.22,11.96,'#d3eee3');floorPatch(11.96,13.72,'#f5ddd5');
     line(v(11.96,.018,4.78),v(11.96,.018,6.78),'#b9b4a9',1.6);
@@ -113,27 +117,38 @@
     disk(13.55,.08,5.48,.14,.07,'#db9cbb');
     disk(12.02,.08,6.58,.13,.06,'#eab86f');
     // 04: the deck explicitly shows an inclined two-sided magnet display (not a plinth).
-    magnetPanel(3.58,7.86,-.52);magnetPanel(5.25,7.12,-.52);
+    activeZone=4;magnetPanel(3.58,7.86,-.52);magnetPanel(5.25,7.12,-.52);
     // 05: native 130 × 90 cm silhouettes, each 55 cm high per deck.
-    for(const name of ['stampA','stampB','stampC']){
+    activeZone=5;for(const name of ['stampA','stampB','stampC']){
       const points=contours[name],cx=points.reduce((s,p)=>s+p[0],0)/points.length,cz=points.reduce((s,p)=>s+p[1],0)/points.length;
       extrudeOutline(points,.55);box(cx-.08,.56,cz-.09,.16,.18,.16,'#e3ae66','#c99869');
     }
     // 06/07: actual AI window-side wavy footprint (maximum 120 cm wide).
     // The low 60 cm solid support is conceptual; plan contains only its footprint.
-    extrudeOutline(contours.windowStrip,.60);
+    activeZone=6;extrudeOutline(contours.windowStrip,.60);
     for(let i=0;i<5;i++){const z=1.15+i*.48;box(.22,.605,z,.12,.07,.18,['#e6b170','#d996ad','#dbcd84','#9fc7ae','#aa9fce'][i])}
     // The 07 pockets remain attached to the glass; remove the two freestanding blue bins.
-    for(const z of [8.05,9.05,10.05,11.05])for(const y of [1.12,1.92])pouch(z,y);
+    activeZone=7;for(const z of [8.05,9.05,10.05,11.05])for(const y of [1.12,1.92])pouch(z,y);
+    activeZone=null;
     // Unknown entry location: do not draw an opening or a misleading entry arrow.
     for(let i=0;i<floor.length;i++){const a=floor[i],b=floor[(i+1)%floor.length];line(a,b,'#c16c87',1.8)}
     drawables.sort((a,b)=>b.depth-a.depth);for(const item of drawables)item.segment?drawLine(item):drawShape(item);
-    for(const [name,pos] of [['套圈圈',[9.55,1.18,2.05]],['手部貼票',[4.38,1.15,2.85]],['磁鐵',[4.40,1.40,7.37]],['蓋章',[4.28,1.19,12.20]],['光影印章',[.66,1.42,2.50]],['投袋子',[.84,1.95,9.64]]])label(name,pos);
-    label('會・折好',[10.96,.22,4.85]);label('不會・亂丟',[12.91,.22,4.85]);
+    for(const [name,pos,zone] of [['套圈圈',[9.55,1.18,2.05],1],['手部貼票',[4.38,1.15,2.85],2],['磁鐵',[4.40,1.40,7.37],4],['蓋章',[4.28,1.19,12.20],5],['光影印章',[.66,1.42,2.50],6],['投袋子',[.84,1.95,9.64],7]])label(name,pos,'#3f6870',zone);
+    label('會・折好',[10.96,.22,4.85],'#3f6870',3);label('不會・亂丟',[12.91,.22,4.85],'#3f6870',3);
   }
-  canvas.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;canvas.setPointerCapture(e.pointerId);canvas.classList.add('dragging')});
-  canvas.addEventListener('pointermove',e=>{if(!drag)return;scene.yaw-=(e.clientX-px)*.006;scene.pitch=clamp(scene.pitch+(e.clientY-py)*.005,.30,1.53);px=e.clientX;py=e.clientY;scheduleDraw()});
-  for(const type of ['pointerup','pointercancel'])canvas.addEventListener(type,()=>{drag=false;canvas.classList.remove('dragging')});
+  const pointerPos=e=>{const r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]};
+  canvas.addEventListener('pointerdown',e=>{drag=true;moved=false;downX=px=e.clientX;downY=py=e.clientY;canvas.setPointerCapture(e.pointerId);canvas.classList.add('dragging')});
+  canvas.addEventListener('pointermove',e=>{
+    if(!drag){const [x,y]=pointerPos(e);canvas.style.cursor=pickZone(x,y)?'pointer':'';return}
+    if(Math.hypot(e.clientX-downX,e.clientY-downY)>6)moved=true;
+    if(moved){scene.yaw-=(e.clientX-px)*.006;scene.pitch=clamp(scene.pitch+(e.clientY-py)*.005,.30,1.53);scheduleDraw()}
+    px=e.clientX;py=e.clientY;
+  });
+  canvas.addEventListener('pointerup',e=>{
+    if(drag&&!moved){const [x,y]=pointerPos(e),zone=pickZone(x,y);if(zone)window.dispatchEvent(new CustomEvent('zone-select',{detail:{zone}}))}
+    drag=false;canvas.classList.remove('dragging');const [x,y]=pointerPos(e);canvas.style.cursor=pickZone(x,y)?'pointer':'';
+  });
+  canvas.addEventListener('pointercancel',()=>{drag=false;canvas.classList.remove('dragging');canvas.style.cursor='' });
   canvas.addEventListener('wheel',e=>{e.preventDefault();scene.radius=clamp(scene.radius+e.deltaY*.018,17,42);scheduleDraw()},{passive:false});
   window.addEventListener('resize',scheduleDraw);
   scheduleDraw();
