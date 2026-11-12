@@ -77,20 +77,41 @@
     // 60 cm conceptual height (not specified by plan).
     extrudeOutline(contours.hands,.60);
     for(let i=0;i<4;i++){let x=3.45+i*.55;box(x,.60,2.70,.30,.055,.38,'#efd0b8','#d5b29d');for(let j=0;j<4;j++)box(x+j*.065,.66,2.62,.045,.035,.12,['#d78ca7','#eed386','#9bbdce','#ba9cc6'][(i+j)%4])}
-    // 03: 350 × 200 cm floor zone only. Clothing lies directly on the floor;
-    // no raised platform, coat rack, legs or implied construction footprint.
-    const shirt=(cx,cz,angle,color)=>{
-      const ca=Math.cos(angle),sa=Math.sin(angle),p=(x,z)=>v(cx+x*ca-z*sa,.025,cz+x*sa+z*ca);
-      const outline=[[-.24,-.43],[-.10,-.43],[0,-.34],[.10,-.43],[.24,-.43],[.40,-.25],[.28,-.10],[.22,-.17],[.22,.43],[-.22,.43],[-.22,-.17],[-.28,-.10],[-.40,-.25]];
-      surface(outline.map(([x,z])=>p(x,z)),color,'#6c838b',1.4);
-      line(p(-.12,.21),p(.12,.21),'#ffffff99',1.4);
+    // 03: the deck's p.10 is a side-by-side choice: neatly folded on the left,
+    // casually thrown on the right. The coloured patches are FLOOR graphics only;
+    // clothing stays on the floor (no raised platform, rack or implied divider wall).
+    const floorPatch=(x0,x1,color)=>surface([v(x0,.012,4.78),v(x1,.012,4.78),v(x1,.012,6.78),v(x0,.012,6.78)],color,null);
+    floorPatch(10.22,11.96,'#d3eee3');floorPatch(11.96,13.72,'#f5ddd5');
+    line(v(11.96,.018,4.78),v(11.96,.018,6.78),'#b9b4a9',1.6);
+    const folded=(x,z,w,d,color)=>{
+      for(let layer=0;layer<3;layer++){
+        const y=.025+layer*.035;
+        box(x,y,z,w,.025,d,color,'#8da4a5');
+        line(v(x+.045,y+.027,z+d*.26),v(x+w-.045,y+.027,z+d*.26),'#ffffffbb',1);
+      }
+      line(v(x+w*.37,.133,z),v(x+w*.50,.133,z+d*.15),'#7798a2',1.2);
+      line(v(x+w*.63,.133,z),v(x+w*.50,.133,z+d*.15),'#7798a2',1.2);
     };
-    shirt(11.11,5.20,-.28,'#e8bc85');shirt(12.36,5.28,.16,'#b5c5dc');shirt(13.25,5.63,-.40,'#daaabb');
-    for(const [x,z,angle,color] of [[11.28,6.11,.10,'#a7c5ad'],[12.40,6.14,-.16,'#f2d7a3']]){
-      const ca=Math.cos(angle),sa=Math.sin(angle),p=(dx,dz,y)=>v(x+dx*ca-dz*sa,y,z+dx*sa+dz*ca);
-      surface([p(-.32,-.23,.030),p(.32,-.23,.030),p(.32,.23,.030),p(-.32,.23,.030)],color,'#718e96',1.2);
-      line(p(-.25,0,.034),p(.25,0,.034),'#ffffffaa',1.2);
-    }
+    folded(10.49,5.00,.66,.46,'#b8d5e9');
+    folded(10.49,5.72,.66,.46,'#efd8a6');
+    folded(11.28,5.75,.44,.57,'#c7dfbf');
+    const looseShirt=(cx,cz,angle,color,scale=1)=>{
+      const ca=Math.cos(angle),sa=Math.sin(angle),p=(x,z)=>v(cx+(x*ca-z*sa)*scale,.055,cz+(x*sa+z*ca)*scale);
+      const outline=[[-.24,-.43],[-.10,-.43],[0,-.34],[.10,-.43],[.24,-.43],[.40,-.25],[.28,-.10],[.22,-.17],[.22,.43],[-.22,.43],[-.22,-.17],[-.28,-.10],[-.40,-.25]];
+      surface(outline.map(([x,z])=>p(x,z)),color,'#8c8586',1.4);
+      line(p(-.12,-.23),p(.10,-.27),'#ffffff9e',1.2);
+    };
+    looseShirt(12.49,5.19,.46,'#edb2a2',.78);
+    looseShirt(13.25,6.22,-.83,'#8bcbbb',.93);
+    const tossed=(cx,cz,angle,color)=>{
+      const ca=Math.cos(angle),sa=Math.sin(angle),p=(x,z,y=.07)=>v(cx+x*ca-z*sa,y,cz+x*sa+z*ca);
+      surface([p(-.30,-.23),p(.28,-.22),p(.24,.28),p(-.28,.22)],color,'#8681ab',1.5);
+      line(p(-.04,-.22,.075),p(-.13,.24,.075),'#ffffffaa',1);
+      line(p(.14,-.22,.075),p(.08,.25,.075),'#ffffffaa',1);
+    };
+    tossed(12.46,6.06,.27,'#b6b0e5');
+    disk(13.55,.08,5.48,.14,.07,'#db9cbb');
+    disk(12.02,.08,6.58,.13,.06,'#eab86f');
     // 04: the deck explicitly shows an inclined two-sided magnet display (not a plinth).
     magnetPanel(3.58,7.86,-.52);magnetPanel(5.25,7.12,-.52);
     // 05: native 130 × 90 cm silhouettes, each 55 cm high per deck.
@@ -107,7 +128,8 @@
     // Unknown entry location: do not draw an opening or a misleading entry arrow.
     for(let i=0;i<floor.length;i++){const a=floor[i],b=floor[(i+1)%floor.length];line(a,b,'#c16c87',1.8)}
     drawables.sort((a,b)=>b.depth-a.depth);for(const item of drawables)item.segment?drawLine(item):drawShape(item);
-    for(const [name,pos] of [['套圈圈',[9.55,1.18,2.05]],['手部貼票',[4.38,1.15,2.85]],['掛／摺衣服',[12.22,.38,5.48]],['磁鐵',[4.40,1.40,7.37]],['蓋章',[4.28,1.19,12.20]],['光影印章',[.66,1.42,2.50]],['投袋子',[.84,1.95,9.64]]])label(name,pos);
+    for(const [name,pos] of [['套圈圈',[9.55,1.18,2.05]],['手部貼票',[4.38,1.15,2.85]],['磁鐵',[4.40,1.40,7.37]],['蓋章',[4.28,1.19,12.20]],['光影印章',[.66,1.42,2.50]],['投袋子',[.84,1.95,9.64]]])label(name,pos);
+    label('會・折好',[10.96,.22,4.85]);label('不會・亂丟',[12.91,.22,4.85]);
   }
   canvas.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;canvas.setPointerCapture(e.pointerId);canvas.classList.add('dragging')});
   canvas.addEventListener('pointermove',e=>{if(!drag)return;scene.yaw-=(e.clientX-px)*.006;scene.pitch=clamp(scene.pitch+(e.clientY-py)*.005,.30,1.53);px=e.clientX;py=e.clientY;scheduleDraw()});
