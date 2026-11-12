@@ -37,19 +37,14 @@
     }
     surface(points.map(([x,z])=>v(x,height,z)),'#70cad8','#388d9b',1.1);
   }
-  // Simple circular low bins remain separate from the plan-derived exhibit platforms.
-  function plinth(cx,cz,rx,rz,height,lobes=0,phase=0){
-    const steps=48,raw=Array.from({length:steps},(_,i)=>{const a=i*2*Math.PI/steps;const m=1+(lobes?.105*Math.cos(lobes*a+phase):0);return [m*Math.cos(a),m*Math.sin(a)]});
-    const mx=Math.max(...raw.map(p=>Math.abs(p[0]))),mz=Math.max(...raw.map(p=>Math.abs(p[1])));
-    const points=raw.map(([x,z])=>[cx+rx*x/mx,cz+rz*z/mz]);
-    for(let i=0;i<steps;i++){const a=points[i],b=points[(i+1)%steps];surface([v(a[0],.015,a[1]),v(b[0],.015,b[1]),v(b[0],height,b[1]),v(a[0],height,a[1])],'#58a7b4',null)}
-    surface(points.map(([x,z])=>v(x,height,z)),'#70cad8','#388d9b',1.1);
-  }
   function glassWall(a,b){surface([v(a[0],0,a[1]),v(b[0],0,b[1]),v(b[0],2.65,b[1]),v(a[0],2.65,a[1])],'#a9dfe52d','#67a9b280');for(let i=0;i<=4;i++){const t=i/4,x=a[0]+(b[0]-a[0])*t,z=a[1]+(b[1]-a[1])*t;line(v(x,0,z),v(x,2.65,z),'#609faa8a',1.4)}line(v(a[0],2.65,a[1]),v(b[0],2.65,b[1]),'#609faa8a',1.4)}
   function magnetPanel(cx,cz,angle=0){
     // 120 × 100 × 65 cm per current deck. Sloping voting surface, not a cylinder.
     const w=1.20,d=1.00,h=.65,cs=Math.cos(angle),sn=Math.sin(angle),p=(x,y,z)=>v(cx+x*cs-z*sn,y,cz+x*sn+z*cs);
     surface([p(-w/2,.02,-d/2),p(w/2,.02,-d/2),p(w/2,h,-d/2),p(-w/2,h,-d/2)],'#5ea9b7');
+    // Triangular side profiles make the sloped, floor-standing wedge visible when rotated.
+    surface([p(-w/2,.02,d/2),p(-w/2,.02,-d/2),p(-w/2,h,-d/2)],'#78b7c2','#608d99',1.1);
+    surface([p(w/2,.02,d/2),p(w/2,.02,-d/2),p(w/2,h,-d/2)],'#78b7c2','#608d99',1.1);
     surface([p(-w/2,.02,d/2),p(w/2,.02,d/2),p(w/2,h,-d/2),p(-w/2,h,-d/2)],'#d5e9e9','#608d99',1.7);
     for(let i=0;i<4;i++){let x=-.42+i*.27;surface([p(x,.32,.24),p(x+.13,.32,.24),p(x+.13,.39,.15),p(x,.39,.15)],['#e6bd72','#db9dab','#91c2ce','#a8bb91'][i],null)}
   }
@@ -105,10 +100,8 @@
     // The low 60 cm solid support is conceptual; plan contains only its footprint.
     extrudeOutline(contours.windowStrip,.60);
     for(let i=0;i<5;i++){const z=1.15+i*.48;box(.22,.605,z,.12,.07,.18,['#e6b170','#d996ad','#dbcd84','#9fc7ae','#aa9fce'][i])}
-    // The current 07 slide gives an approximately 400 × 180 cm glass voting area;
-    // its pockets are drawn on the glass, with two 70 cm half-round object bins.
+    // The 07 pockets remain attached to the glass; remove the two freestanding blue bins.
     for(const z of [8.05,9.05,10.05,11.05])for(const y of [1.12,1.92])pouch(z,y);
-    for(const z of [8.30,11.40])plinth(.67,z,.35,.35,.70,0);
     // Unknown entry location: do not draw an opening or a misleading entry arrow.
     for(let i=0;i<floor.length;i++){const a=floor[i],b=floor[(i+1)%floor.length];line(a,b,'#c16c87',1.8)}
     drawables.sort((a,b)=>b.depth-a.depth);for(const item of drawables)item.segment?drawLine(item):drawShape(item);
