@@ -41,7 +41,7 @@
   function magnetPanel(cx,cz,angle=0){
     // Deck p.12: two sloped faces meet a narrow flat top; the side profile is a trapezoid.
     // Overall 120 × 100 × 65 cm is provisional per the current deck, not a construction detail.
-    const w=1.20,h=.65,frontFoot=.50,rearFoot=-.50,frontTop=-.18,rearTop=-.42;
+    const w=1.20,h=.65,frontFoot=.50,rearFoot=-.50,frontTop=.12,rearTop=-.12;
     const cs=Math.cos(angle),sn=Math.sin(angle),p=(x,y,z)=>v(cx+x*cs-z*sn,y,cz+x*sn+z*cs);
     const faceZ=y=>frontFoot+(frontTop-frontFoot)*(y-.02)/(h-.02)+.012;
     surface([p(-w/2,.02,rearFoot),p(w/2,.02,rearFoot),p(w/2,h,rearTop),p(-w/2,h,rearTop)],'#5ea9b7','#608d99',1.1);
