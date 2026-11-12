@@ -30,7 +30,7 @@
     <aside>
       <div class="eyebrow">好廢的問卷 × 桃園兒童美術館</div>
       <h1>問題<span>長出來</span></h1>
-      <p class="lead">依新版場地配置 PNG 的標示尺寸建立比例模型；展品以簡報目前啟用的展項為準。未定案的造型仍為概念示意。</p>
+      <p class="lead">點選 3D 模型中的展品或名稱，查看各區玩法與簡報題目；也可拖曳旋轉場地。展品造型仍為概念示意。</p>
       <nav aria-label="七個展區介紹"><ul class="legend">
         <li><button type="button" class="zone-button" data-zone="1" aria-haspopup="dialog"><span class="number">01</span><i class="dot" style="--c:#d99658"></i>套圈圈<span class="arrow" aria-hidden="true">↗</span></button></li>
         <li><button type="button" class="zone-button" data-zone="2" aria-haspopup="dialog"><span class="number">02</span><i class="dot" style="--c:#d7849e"></i>手部貼票<span class="arrow" aria-hidden="true">↗</span></button></li>
@@ -45,7 +45,7 @@
     <section class="stage" aria-label="問題長出來新版 3D 場地配置">
       <canvas id="view" role="img" aria-label="L 形展區的 3D 概念示意：上方為套圈圈、手部貼票及地面上的掛／摺衣服區；轉角是磁鐵，下方為蓋章；左側玻璃旁為光影印章及投袋子。可拖曳旋轉與滾輪縮放。"></canvas>
       <div class="topline">新版配置 · 比例示意</div>
-      <div class="bottomline">拖曳旋轉 · 滾輪縮放</div>
+      <div class="bottomline">點選展品看介紹 · 拖曳旋轉 · 滾輪縮放</div>
     </section>
   </main>
   <dialog id="zone-dialog" class="zone-dialog" aria-labelledby="dialog-title">
@@ -58,7 +58,7 @@
     </div>
   </dialog>
   <script src="./plan-contours.js"></script>
-  <script src="./viewer.js"></script>
+  <script src="./viewer.js?v=object-picking-20261112"></script>
   <script>
     (() => {
       // Only the current seven exhibit sections (slides 3–21); later archive/production slides are not used.
@@ -74,9 +74,9 @@
       ];
       const dialog = document.getElementById('zone-dialog');
       const field = id => document.getElementById('dialog-' + id);
-      document.querySelectorAll('[data-zone]').forEach(button => button.addEventListener('click', () => {
-        const index = Number(button.dataset.zone) - 1;
+      function openZone(index) {
         const zone = zones[index];
+        if (!zone) return;
         field('index').textContent = `展區 ${String(index + 1).padStart(2, '0')} ／ 07`;
         field('title').textContent = zone.title;
         field('theme').textContent = zone.theme;
@@ -87,7 +87,9 @@
         field('source').href = deck + encodeURIComponent(zone.slide);
         dialog.showModal();
         document.getElementById('dialog-close').focus();
-      }));
+      }
+      document.querySelectorAll('[data-zone]').forEach(button => button.addEventListener('click', () => openZone(Number(button.dataset.zone) - 1)));
+      window.addEventListener('zone-select', event => openZone(event.detail.zone - 1));
       document.getElementById('dialog-close').addEventListener('click', () => dialog.close());
       dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
     })();
