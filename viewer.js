@@ -39,14 +39,16 @@
   }
   function glassWall(a,b){surface([v(a[0],0,a[1]),v(b[0],0,b[1]),v(b[0],2.65,b[1]),v(a[0],2.65,a[1])],'#a9dfe52d','#67a9b280');for(let i=0;i<=4;i++){const t=i/4,x=a[0]+(b[0]-a[0])*t,z=a[1]+(b[1]-a[1])*t;line(v(x,0,z),v(x,2.65,z),'#609faa8a',1.4)}line(v(a[0],2.65,a[1]),v(b[0],2.65,b[1]),'#609faa8a',1.4)}
   function magnetPanel(cx,cz,angle=0){
-    // 120 × 100 × 65 cm per current deck. Sloping voting surface, not a cylinder.
-    const w=1.20,d=1.00,h=.65,cs=Math.cos(angle),sn=Math.sin(angle),p=(x,y,z)=>v(cx+x*cs-z*sn,y,cz+x*sn+z*cs);
-    surface([p(-w/2,.02,-d/2),p(w/2,.02,-d/2),p(w/2,h,-d/2),p(-w/2,h,-d/2)],'#5ea9b7');
-    // Triangular side profiles make the sloped, floor-standing wedge visible when rotated.
-    surface([p(-w/2,.02,d/2),p(-w/2,.02,-d/2),p(-w/2,h,-d/2)],'#78b7c2','#608d99',1.1);
-    surface([p(w/2,.02,d/2),p(w/2,.02,-d/2),p(w/2,h,-d/2)],'#78b7c2','#608d99',1.1);
-    surface([p(-w/2,.02,d/2),p(w/2,.02,d/2),p(w/2,h,-d/2),p(-w/2,h,-d/2)],'#d5e9e9','#608d99',1.7);
-    for(let i=0;i<4;i++){let x=-.42+i*.27;surface([p(x,.32,.24),p(x+.13,.32,.24),p(x+.13,.39,.15),p(x,.39,.15)],['#e6bd72','#db9dab','#91c2ce','#a8bb91'][i],null)}
+    // Deck p.12: two sloped faces meet a narrow flat top; the side profile is a trapezoid.
+    // Overall 120 × 100 × 65 cm is provisional per the current deck, not a construction detail.
+    const w=1.20,h=.65,frontFoot=.50,rearFoot=-.50,frontTop=-.18,rearTop=-.42;
+    const cs=Math.cos(angle),sn=Math.sin(angle),p=(x,y,z)=>v(cx+x*cs-z*sn,y,cz+x*sn+z*cs);
+    const faceZ=y=>frontFoot+(frontTop-frontFoot)*(y-.02)/(h-.02)+.012;
+    surface([p(-w/2,.02,rearFoot),p(w/2,.02,rearFoot),p(w/2,h,rearTop),p(-w/2,h,rearTop)],'#5ea9b7','#608d99',1.1);
+    for(const x of [-w/2,w/2])surface([p(x,.02,frontFoot),p(x,.02,rearFoot),p(x,h,rearTop),p(x,h,frontTop)],'#78b7c2','#608d99',1.1);
+    surface([p(-w/2,h,frontTop),p(-w/2,h,rearTop),p(w/2,h,rearTop),p(w/2,h,frontTop)],'#85bcc5','#608d99',1.1);
+    surface([p(-w/2,.02,frontFoot),p(w/2,.02,frontFoot),p(w/2,h,frontTop),p(-w/2,h,frontTop)],'#d5e9e9','#608d99',1.7);
+    for(let i=0;i<4;i++){const x=-.42+i*.27;surface([p(x,.32,faceZ(.32)),p(x+.13,.32,faceZ(.32)),p(x+.13,.39,faceZ(.39)),p(x,.39,faceZ(.39))],['#e6bd72','#db9dab','#91c2ce','#a8bb91'][i],null)}
   }
   function pouch(z,y){
     // Abstract wall-mounted voting pockets; location is schematic, not installation engineering.
