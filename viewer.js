@@ -133,8 +133,13 @@
     // Unknown entry location: do not draw an opening or a misleading entry arrow.
     for(let i=0;i<floor.length;i++){const a=floor[i],b=floor[(i+1)%floor.length];line(a,b,'#c16c87',1.8)}
     drawables.sort((a,b)=>b.depth-a.depth);for(const item of drawables)item.segment?drawLine(item):drawShape(item);
-    for(const [name,pos,zone] of [['套圈圈',[9.55,1.18,2.05],1],['手部貼票',[4.38,1.15,2.85],2],['磁鐵',[4.40,1.40,7.37],4],['蓋章',[4.28,1.19,12.20],5],['光影印章',[.66,1.42,2.50],6],['投袋子',[.84,1.95,9.64],7]])label(name,pos,'#3f6870',zone);
-    label('會・折好',[10.96,.22,4.85],'#3f6870',3);label('不會・亂丟',[12.91,.22,4.85],'#3f6870',3);
+    // Use the zone titles from the exhibition deck; interaction names stay in the sidebar/dialog.
+    for(const [name,pos,zone] of [
+      ['我的感覺、感受',[9.55,1.18,2.05],1],['認識身體',[4.38,1.15,2.85],2],
+      ['我與家庭責任',[11.96,.95,5.77],3],['我跟社會的關聯',[4.40,1.40,7.37],4],
+      ['我們想要的生活',[4.28,1.19,12.20],5],['我對自然的想像',[.66,1.42,2.50],6],
+      ['我與自然的關係',[.84,1.95,9.64],7]
+    ])label(name,pos,'#3f6870',zone);
   }
   const pointerPos=e=>{const r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]};
   canvas.addEventListener('pointerdown',e=>{drag=true;moved=false;downX=px=e.clientX;downY=py=e.clientY;canvas.setPointerCapture(e.pointerId);canvas.classList.add('dragging')});
